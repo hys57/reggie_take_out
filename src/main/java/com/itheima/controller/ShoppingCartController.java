@@ -1,8 +1,10 @@
 package com.itheima.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.itheima.common.BaseContext;
 import com.itheima.common.R;
+import com.itheima.entity.Dish;
 import com.itheima.entity.ShoppingCart;
 import com.itheima.service.ShoppingCartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,5 +73,30 @@ public class ShoppingCartController {
         shoppingCartService.remove(queryWrapper);
 
         return R.success("清空购物车");
+    }
+
+    @PostMapping("/sub")
+    public R<Object> sub(@RequestBody ShoppingCart shoppingCart){
+        //System.out.println(shoppingCart.getDishId());
+        Long currentId = BaseContext.getCurrentId();
+        Long dishId=shoppingCart.getDishId();
+
+        LambdaUpdateWrapper<ShoppingCart> updateWrapper=new LambdaUpdateWrapper<>();
+
+        updateWrapper.eq(ShoppingCart::getUserId,currentId)
+        .eq(ShoppingCart::getDishId,dishId);
+
+        //获取商品数量
+        int number = shoppingCartService.getOne(updateWrapper).getNumber();
+
+        if(number==1){
+            shoppingCartService.remove(updateWrapper);
+            return R.success("清空");
+        }else {
+            updateWrapper.set(ShoppingCart::getNumber,number-1);
+            shoppingCartService.update(updateWrapper);
+        }
+        ShoppingCart one = shoppingCartService.getOne(updateWrapper);
+        return R.success(one);
     }
 }
