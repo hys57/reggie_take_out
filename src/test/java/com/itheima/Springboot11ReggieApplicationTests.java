@@ -8,6 +8,7 @@ class Springboot11ReggieApplicationTests {
 
 	@Test
 	void contextLoads() {
+		//输出helloWorld
 	}
 
 }
